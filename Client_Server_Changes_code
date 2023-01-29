@@ -1,0 +1,62 @@
+//object is not paassing
+
+//string is passing.
+
+==========SERVER==============
+Server side changes:
+
+ChatClient.java: removed main() method
+ChatServer.java: line: 30
+
+change1:
+		// SERVER Code Add-on Start
+		try {
+			serverSocket = new ServerSocket(8225); 
+			System.out.println("receiver socket created with receiver" +
+			 "[Receiver.Receiver] and port ");
+		}
+		catch (IOException ex) {
+			//Logger.getLogger(Receiver.class.getName()).log(Level.SEVERE, 
+					//"Error creating socket", ex);
+			System.out.println("error");
+		}
+		// SERVER Code Add-on End
+
+change 2:
+// Server main() Added Start
+	public static void main( String[] args) {
+		String propertiesFile = null;
+		
+		try {
+			propertiesFile = args[0];
+		}
+		catch (ArrayIndexOutOfBoundsException ex) {
+			propertiesFile = "config/ChatNodeDefaults.properties";
+		}
+		
+		(new ChatServer(propertiesFile)).run();
+		
+	}
+	//Server main() Added End
+
+ChatServerWoeker: made some error print stmnts - commented
+NodeInfo: implements serializable is added
+
+Reciever.java : No changes
+ReceiverWorker.java: No changes
+
+Sendert.java: no changes
+
+=======CLIENT=============
+
+ChatClient.java: No Changes
+ChatServer.java: No changes
+ChatServerWorker.java: NO 
+NodeInfo.java:implements serializable
+Receiver.java: No
+ReceiverWorker.java: No
+Sender.java: 75,76 
+//request to leave server //edited start
+					String name_app = ChatClient.myNodeInfo.getName();
+					writeToNet.writeObject( new Message(NOTE, name_app+":"+inputLine));
+					//edited end
