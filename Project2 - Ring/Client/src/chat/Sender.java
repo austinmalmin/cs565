@@ -13,7 +13,7 @@ import message.Message;
 
 /*
  * PROGRESS NOTE:
- * this class is complete
+ * TODO: reformat sending as a list of [my_conn_info, orig_conn_info]
  */
 public class Sender extends Thread implements MessageTypes {
 	
