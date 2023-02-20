@@ -13,7 +13,7 @@ import message.Message;
 
 /*
  * PROGRESS NOTE:
- *           
+ *  TODO: complete JOIN, SHUTDOWN, NOTE and SHUTDOWN_ALL cases for ring      
  */
 public class ReceiverWorker extends Thread implements MessageTypes {
 	//init variables
