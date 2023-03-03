@@ -59,23 +59,23 @@ public class ChatClient implements Runnable {
 		myNodeInfo = new NodeInfo(NetworkUtilities.getMyIP(), portNumber, name);
 		
 		try {
-			serverPort = Integer.parseInt(properties.getProperty("SERVER_PORT"));
+			knownClientPort = Integer.parseInt(properties.getProperty("KNOWN_CLIENT_PORT"));
 		}
 		catch (NumberFormatException ex ) {
 			Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, 
-					"error accessing server port number", ex );
+					"error accessing known client port number", ex );
 			System.exit(1);
 		}
 		
-		serverIP = properties.getProperty("SERVER_IP");
-		if (serverIP == null) {
+		knownClientIP = properties.getProperty("KNOWN_CLIENT_IP");
+		if (knownClientIP == null) {
 			Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, 
-					"error accessing server IP");
+					"error accessing known client IP");
 			System.exit(1);
 		}
 		//create server
-		if (serverPort != 0 && serverIP != null) {
-			serverNodeInfo = new NodeInfo( serverIP, serverPort);
+		if (knownClientIP != 0 && knownClientIP != null) {
+			knownClientInfo = new NodeInfo( knownClientIP, knownClientPort);
 		}
 		
 	}

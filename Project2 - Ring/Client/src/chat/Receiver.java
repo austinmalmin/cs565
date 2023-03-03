@@ -13,10 +13,12 @@ public class Receiver extends Thread {
 
 	static ServerSocket receiverSocket = null;
 	static String userName = null;
+	NodeInfo myPointer = null;
 	
 	//constructor
-	public Receiver() {
+	public Receiver(NodeInfo myPointer) {
 		try {
+			this.myPointer = myPointer;
 			receiverSocket = new ServerSocket(ChatClient.myNodeInfo.getPort());
 			System.out.println("receiver socket created with receiver" +
 			 "[Receiver.Receiver] and port " + ChatClient.myNodeInfo.getPort());
@@ -29,10 +31,10 @@ public class Receiver extends Thread {
 				ChatClient.myNodeInfo.getIp() + ":" + ChatClient.myNodeInfo.getPort());
 	}
 	
-	public void run() {
+	public void run(NodeInfo myPointer) {
 		while (true) {
 			try {
-				(new ReceiverWorker(receiverSocket.accept())).start();
+				(new ReceiverWorker(myPointer, receiverSocket.accept())).start();
 			}
 			
 			catch (IOException ex) {

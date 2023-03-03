@@ -18,7 +18,7 @@ import message.Message;
 public class Sender extends Thread implements MessageTypes {
 	
 	//init variables
-	Socket serverConnection = null;
+	Socket myPointerConn = null;
 	
 	ObjectInputStream readFromNet = null;
 	ObjectOutputStream writeToNet = null;
@@ -33,7 +33,7 @@ public class Sender extends Thread implements MessageTypes {
 		
 	}
 	
-	public void run() {
+	public void run(NodeInfo knownChatClient) {
 		
 		while(true) {
 			//read user input 
@@ -51,8 +51,7 @@ public class Sender extends Thread implements MessageTypes {
 				String[] connectivityInfo = inputLine.split("[ ]+");
 				
 				try {
-					ChatClient.serverNodeInfo = 
-							new NodeInfo(connectivityInfo[1], Integer.parseInt(connectivityInfo[2]));
+					ChatClient.myPointer = knownClientInfo;
 					System.out.println("Server node info created");
 				}
 				catch (ArrayIndexOutOfBoundsException ex) {
@@ -61,16 +60,16 @@ public class Sender extends Thread implements MessageTypes {
 				}
 				
 				//sanity check
-				if (ChatClient.serverNodeInfo == null) {
+				if (ChatClient.myPointer == null) {
 					System.err.println("No server connectivity info provided");
 					continue;
 				}
 				//info valid connect to server
 				try {
-					serverConnection = new Socket( ChatClient.serverNodeInfo.getIp(),
-							               ChatClient.serverNodeInfo.getPort());
-					readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-					writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+					myPointerConn = new Socket( ChatClient.myPointer.getIp(),
+							               ChatClient.myPointer.getPort());
+					readFromNet = new ObjectInputStream(myPointerConn.getInputStream());
+					writeToNet = new ObjectOutputStream(myPointerConn.getOutputStream());
 					
 					//request to join server 
 					NodeInfo obj1 = ChatClient.myNodeInfo; //m
@@ -78,7 +77,7 @@ public class Sender extends Thread implements MessageTypes {
 					//writeToNet.writeObject( new Message(JOIN, ChatClient.myNodeInfo));
 					
 					//close connection
-					serverConnection.close();
+					myPointerConn.close();
 				}
 				catch (IOException ex) {
 					Logger.getLogger(Sender.class.getName()).log(Level.SEVERE,
@@ -101,17 +100,17 @@ public class Sender extends Thread implements MessageTypes {
 				//leave server 
 				try {
 					//open connection to server
-					serverConnection = new Socket( ChatClient.serverNodeInfo.getIp(),
-				               ChatClient.serverNodeInfo.getPort()); 
-					readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-					writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+					myPointerConn = new Socket( ChatClient.myPointer.getIp(),
+				               ChatClient.myPointerConn.getPort()); 
+					readFromNet = new ObjectInputStream(myPointerConn.getInputStream());
+					writeToNet = new ObjectOutputStream(myPointerConn.getOutputStream());
 					
 					//request to leave server 
 					
 					writeToNet.writeObject( new Message(LEAVE,ChatClient.myNodeInfo));
 					
 					//close connection
-					serverConnection.close();
+					myPointerConn.close();
 				}
 				catch (IOException ex) {
 					Logger.getLogger(Sender.class.getName()).log(Level.SEVERE,
@@ -129,17 +128,17 @@ public class Sender extends Thread implements MessageTypes {
 				//shutdown all server connections 
 				try {
 					//open connection to server
-					serverConnection = new Socket( ChatClient.serverNodeInfo.getIp(),
-				               ChatClient.serverNodeInfo.getPort()); 
-					readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-					writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+					myPointerConn = new Socket( ChatClient.myPointer.getIp(),
+				               ChatClient.myPointer.getPort()); 
+					readFromNet = new ObjectInputStream(myPointerConn.getInputStream());
+					writeToNet = new ObjectOutputStream(myPointerConn.getOutputStream());
 					
 					//request to shutdown server
 					
 					writeToNet.writeObject( new Message(SHUTDOWN_ALL,ChatClient.myNodeInfo));
 					
 					//close connection
-					serverConnection.close();
+					myPointerConn.close();
 				}
 				catch (IOException ex) {
 					Logger.getLogger(Sender.class.getName()).log(Level.SEVERE,
@@ -157,17 +156,17 @@ public class Sender extends Thread implements MessageTypes {
 				//shutdown personal server connection
 				try {
 					//open connection to server
-					serverConnection = new Socket( ChatClient.serverNodeInfo.getIp(),
-				               ChatClient.serverNodeInfo.getPort()); 
-					readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-					writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+					myPointerConn = new Socket( ChatClient.myPointer.getIp(),
+				               ChatClient.myPointer.getPort()); 
+					readFromNet = new ObjectInputStream(myPointerConn.getInputStream());
+					writeToNet = new ObjectOutputStream(myPointerConn.getOutputStream());
 					
 					//request to leave server
 					
 					writeToNet.writeObject( new Message(SHUTDOWN,ChatClient.myNodeInfo));
 					
 					//close connection
-					serverConnection.close();
+					myPointerConn.close();
 				}
 				catch (IOException ex) {
 					Logger.getLogger(Sender.class.getName()).log(Level.SEVERE,
@@ -183,16 +182,16 @@ public class Sender extends Thread implements MessageTypes {
 				}
 				try {
 					//open connection to server
-					serverConnection = new Socket( ChatClient.serverNodeInfo.getIp(),
-				               ChatClient.serverNodeInfo.getPort()); 
-					readFromNet = new ObjectInputStream(serverConnection.getInputStream());
-					writeToNet = new ObjectOutputStream(serverConnection.getOutputStream());
+					myPointerConn = new Socket( ChatClient.myPointer.getIp(),
+				               ChatClient.myPointer.getPort()); 
+					readFromNet = new ObjectInputStream(myPointerConn.getInputStream());
+					writeToNet = new ObjectOutputStream(myPointerConn.getOutputStream());
 					
 					String name_app = ChatClient.myNodeInfo.getName();
 					writeToNet.writeObject( new Message(NOTE, name_app+":"+inputLine));
 					
 					//close connection
-					serverConnection.close();
+					myPointerConn.close();
 					
 				}
 				catch (IOException ex) {

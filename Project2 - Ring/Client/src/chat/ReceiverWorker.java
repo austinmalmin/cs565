@@ -22,10 +22,12 @@ public class ReceiverWorker extends Thread implements MessageTypes {
 	ObjectOutputStream writeToNet = null;
 	Object[] messageList = null;
 	Message origMessage, behindConnInfo;
+	NodeInfo myPointer = null;
 	
 	//constructor 
-	public ReceiverWorker(Socket clientConnection) {
+	public ReceiverWorker(NodeInfo myPointer, Socket clientConnection, NodeInfo myPointer) {
 		try {
+			this.myPointer = myPointer;
 			this.clientConnection = clientConnection;
 			readFromNet = new ObjectInputStream(clientConnection.getInputStream());
 			writeToNet = new ObjectOutputStream(clientConnection.getOutputStream());
@@ -45,8 +47,8 @@ public class ReceiverWorker extends Thread implements MessageTypes {
 			//read message 
 			messageList = readFromNet.readObject();
 			
-			behindConnInfo = (Message) messageList[0];
-			origMessage = (Message) messageList[1];
+			origMessage = (Message) messageList[0];
+			//origMessage = (Message) messageList[1];
 		}
 		catch ( IOException | ClassNotFoundException ex) {
 			Logger.getLogger(ReceiverWorker.class.getName()).log(Level.SEVERE,
@@ -61,8 +63,8 @@ public class ReceiverWorker extends Thread implements MessageTypes {
 			
 			//if shutdown close connection and exit
 			case LEAVE:
-			case SHUTDOWN:
-				System.out.println("Received shutdown from client behind me");
+				System.out.println("Received leave from client behind me");
+				clientAheadOfLeaver = (Message) messageList[1];
 				try {
 					//check if conn info of the person leaving matches conn info of person i am pointing to
 					
@@ -84,7 +86,7 @@ public class ReceiverWorker extends Thread implements MessageTypes {
 					// check if my conn info doesn't match conn info of origMessage
 						
 						//print message
-						System.out.println((String) orig_message.getContent());
+
 						// forward message around the ring
 						
 					//otherwise assume I am the orginal sender and stop forwarding
@@ -113,8 +115,17 @@ public class ReceiverWorker extends Thread implements MessageTypes {
 				
 			case SHUTDOWN_ALL:
 				//chcek if my conn info doesn't match the conn info of the orig message
+				if( !origMessage.equals(ChatClient) )
 	
 					//forward shutdown message around the ring
+					writeToNet(new messageList[new Message(SHUTDOWN_ALL,origMessage.myNodeInfo)]);
+
+
+
+				//exit 
+				System.out,println("Shutting down");
+				exit(0);
+
 					
 				//close connection
 				clientConnection.close();
