@@ -3,8 +3,11 @@ package transaction.server.lock;
 import transaction.server.account.Account;
 import transaction.server.transaction.Transaction;
 
-public class LockManager {
+public class LockManager extends Thread{
 	
+	public LockManager(){
+		//to do LM
+	}
 	public void setLock(Account account, Transaction transactionId, LockTypes lockType ) {
 		/* Find the lock
 		 * acquire the lock of type lockType

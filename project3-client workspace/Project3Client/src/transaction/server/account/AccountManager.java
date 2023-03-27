@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class AccountManager 
+public class AccountManager extends Thread
 {
 	
 	AccountManager accountManagerObj = new AccountManager();
@@ -16,17 +16,10 @@ public class AccountManager
 	
 	StringBuffer log = new StringBuffer("");
 	
-	 int lastCommittedTransactionNumber;
 	 int transactionID;
 	 int transactionNumber;
 	  
-	//constructor
-	public AccountManager(int transactionID, int lastCommittedTransactionNumber){
-			this.transactionID = transactionID;
-			this.lastCommittedTransactionNumber = lastCommittedTransactionNumber;
-	}
-
-	
+	//constructor todo
 	public AccountManager() {
 		// TODO Auto-generated constructor stub
 	}

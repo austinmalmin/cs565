@@ -17,13 +17,13 @@ import transaction.server.lock.TransactionAbortedException;
 public class TransactionServerProxy implements MessageTypes{
 	
 
-	private static final String OPEN_TRANSACTION = null;
-	private static final int TRANSACTION_COMMITTED = 0;
-	private static final String CLOSE_TRANSACTION = null;
-	private static final String WRITE_REQUEST = null;
-	private static final String READ_REQUEST = null;
-	private static final String READ_REQUEST_RESPONSE = null;
-	private static final String TRANSACTION_ABORTED = null;
+	/*
+	 * private static final int OPEN_TRANSACTION = null; private static final String
+	 * CLOSE_TRANSACTION = null; private static final String WRITE_REQUEST = null;
+	 * private static final String READ_REQUEST = null; private static final String
+	 * READ_REQUEST_RESPONSE = null; private static final String TRANSACTION_ABORTED
+	 * = null;
+	 */
 	String host = null;
 	int port;
 	
@@ -63,23 +63,11 @@ public class TransactionServerProxy implements MessageTypes{
 		return transactionID;
 	}
 	
+	//implement this method with locking
 	public int closeTransaction() {
-		int returnStatus = TRANSACTION_COMMITTED;
 		
-		try {
-			writeToNet.writeObject(new Message(CLOSE_TRANSACTION, null));
-			returnStatus = (Integer) readFromNet.readObject();
-			
-			readFromNet.close();
-			writeToNet.close();
-			dbConnection.close();
-		}
-		catch(Exception ex){
-			System.out.println(" [TransactionServerProxy.closeTransaction] Error Occurred");
-			ex.printStackTrace();
-		}
-		
-		return returnStatus;
+
+		return -1;
 	}
 	
 	public int read(int accountNumber) throws TransactionAbortedException

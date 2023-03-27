@@ -21,7 +21,7 @@ import static utils.TerminalColors.READ_COLOR;
 import static utils.TerminalColors.RESET_COLOR;
 import static utils.TerminalColors.WRITE_COLOR;*/
 
-public class TransactionManager implements MessageTypes
+public class TransactionManager extends Thread implements MessageTypes
 {	
 	
 	private static int transactionIdCounter = 0;
@@ -34,7 +34,7 @@ public class TransactionManager implements MessageTypes
 	
 	 public TransactionManager(Socket client) {
 	  
-		 
+		(new TransactionManagerWorker(client)).start(); 
 	 }
 	
 	public ArrayList<AccountManager> getAbortedTransaction()
@@ -111,7 +111,7 @@ public class TransactionManager implements MessageTypes
 					{
 						// assign a new transaction ID, also pass in the last assigned transaction number
 						// as to the latter, that number may refer to a (prior, non-overlapping) transaction that needed to be aborted
-						transaction = new AccountManager(++transactionIdCounter, transactionNumberCounter);
+						//transaction = new AccountManager(++transactionIdCounter, transactionNumberCounter);
 						runningTransactions.add(transaction);
 					}
 					try
