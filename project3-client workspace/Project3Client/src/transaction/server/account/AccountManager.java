@@ -4,15 +4,12 @@ import transaction.server.TransactionServer;
 
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class AccountManager extends Thread
 {
+
 	
-	AccountManager accountManagerObj = new AccountManager();
-	
-	ArrayList<Integer> readSet = new ArrayList<>();
-	HashMap<Integer, Integer> writeSet = new HashMap<>();
+	ArrayList<Account> accountList = new ArrayList<>();
 	
 	StringBuffer log = new StringBuffer("");
 	
@@ -20,8 +17,16 @@ public class AccountManager extends Thread
 	 int transactionNumber;
 	  
 	//constructor todo
-	public AccountManager() {
+	public AccountManager(int numAccounts, int startingBal) {
 		// TODO Auto-generated constructor stub
+		int i=0;
+		while(i<numAccounts)
+		{
+			//creates i accounts with balance startingBal.
+			
+			accountList.add(new Account(i, startingBal));
+			i++;
+		}
 	}
 
 

@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.Properties;
 
 import transaction.client.NodeInfo;
+import transaction.client.TransactionClient;
 import transaction.server.account.AccountManager;
 import transaction.server.lock.LockManager;
 import transaction.server.transaction.TransactionManager;
@@ -28,10 +29,10 @@ public class TransactionServer extends Thread{
 	public static boolean transactionView;
 	ServerSocket recieverSocket = null;
 	
-	static TransactionManager transactionManager = null;
 	static AccountManager accountManager = null;
 	static LockManager lockManager = null;
 	
+	static TransactionManager transactionManager = null;
 	static int messageCount = 0;
 	int serverPort = 0;
 	String serverIP = null;
@@ -40,6 +41,9 @@ public class TransactionServer extends Thread{
 	NodeInfo serverNodeInfo = null;
 	
 	Socket client = null;
+	
+	int startingBal = -1;
+	int  numAccounts = 0;
 	
 	public TransactionServer(String propertiesFile) 
 	{
@@ -76,6 +80,18 @@ public class TransactionServer extends Thread{
 			 serverNodeInfo = new NodeInfo(this.serverIP, this.serverPort);
 		}
 		
+		startingBal = Integer.parseInt(properties.getProperty("STARTING_BAL"));
+		if (startingBal == -1) {
+			Logger.getLogger(TransactionClient.class.getName()).log(Level.SEVERE, 
+					"error accessing starting bal");
+			System.exit(1);
+		}
+		numAccounts =  Integer.parseInt(properties.getProperty("NUM_ACCOUNTS") );
+		if (numAccounts == 0) {
+			Logger.getLogger(TransactionClient.class.getName()).log(Level.SEVERE, 
+					"error accessing num accounts");
+			System.exit(1);
+		}
 		
 		try {
 			recieverSocket = new ServerSocket(serverPort);
@@ -83,20 +99,18 @@ public class TransactionServer extends Thread{
 		catch(IOException ex) {
 			System.out.println("error creating socket");
 		}
+		
+		accountManager = new AccountManager(numAccounts, startingBal);
+		lockManager = new LockManager();
+		transactionManager = new TransactionManager(accountManager, lockManager);
 	}
 	public void run()
 	{
 		while(true) {
 			try {
 				
-				
-				(transactionManager =new TransactionManager(recieverSocket.accept())).start();
-				
-				//to-do paramaeters for the AM
-				(accountManager =new AccountManager()).start();
-				
-				//to-do paramaeters for the LM
-				(lockManager =new LockManager()).start();
+				client = recieverSocket.accept();
+				transactionManager.runTransaction(client);
 			}
 			catch(IOException ex) {
 				System.err.println("Client is not accepted");

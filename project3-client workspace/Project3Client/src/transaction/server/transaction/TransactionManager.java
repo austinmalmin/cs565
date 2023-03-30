@@ -12,6 +12,7 @@ import transaction.comm.Message;
 import transaction.comm.MessageTypes;
 import transaction.server.TransactionServer;
 import transaction.server.account.AccountManager;
+import transaction.server.lock.LockManager;
 
 //Add Colors once we format output
 
@@ -31,10 +32,15 @@ public class TransactionManager extends Thread implements MessageTypes
 	private static final String RESET_COLOR = null;
 	private static int transactionNumberCounter = 0;
 	
+	static AccountManager accountManager = null;
+	static LockManager lockManager = null;
 	
-	 public TransactionManager(Socket client) {
+	private static final ArrayList<AccountManager> committedTransactions = new ArrayList<> ();
+	
+	 public TransactionManager(AccountManager accountManager, LockManager lockManager) {
 	  
-		(new TransactionManagerWorker(client)).start(); 
+		 this.accountManager = accountManager;
+		 this.lockManager = lockManager;
 	 }
 	
 	public ArrayList<AccountManager> getAbortedTransaction()
