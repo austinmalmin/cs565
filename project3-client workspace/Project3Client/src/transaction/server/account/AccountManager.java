@@ -5,6 +5,7 @@ import transaction.server.TransactionServer;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+//Need to implement Read and Write
 public class AccountManager extends Thread
 {
 

@@ -8,11 +8,9 @@ import java.util.logging.Logger;
 import utils.PropertyHandler;
 import utils.NetworkUtilities;
 
+//generate transactionServerProxy
 public class TransactionClient 
 {
-	//init variables
-//	static Sender sender = null;
-//	static Receiver receiver = null;
 	
 	public static NodeInfo myNodeInfo = null;
 	public static NodeInfo serverNodeInfo = null;
@@ -83,7 +81,7 @@ public class TransactionClient
 		
 	}
 		
-	//generate transactionServerProxy
+	
 
 	public static void main( String[] args)
 	{

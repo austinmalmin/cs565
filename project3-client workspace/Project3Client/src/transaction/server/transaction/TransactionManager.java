@@ -16,11 +16,7 @@ import transaction.server.lock.LockManager;
 
 //Add Colors once we format output
 
-/*import static utils.TerminalColors.ABORT_COLOR;
-import static utils.TerminalColors.OPEN_COLOR;
-import static utils.TerminalColors.READ_COLOR;
-import static utils.TerminalColors.RESET_COLOR;
-import static utils.TerminalColors.WRITE_COLOR;*/
+//Progress Note: Need to add code for switch statements
 
 public class TransactionManager extends Thread implements MessageTypes
 {	

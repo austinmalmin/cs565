@@ -6,6 +6,7 @@ import java.util.concurrent.locks.Lock;
 
 import transaction.server.TransactionServer;
 
+//Complete - bug on getLocks()
 public class Transaction {
 
 	int transactionId;

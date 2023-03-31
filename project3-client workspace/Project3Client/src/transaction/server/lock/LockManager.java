@@ -3,6 +3,7 @@ package transaction.server.lock;
 import transaction.server.account.Account;
 import transaction.server.transaction.Transaction;
 
+//Need to work
 public class LockManager extends Thread{
 	
 	public LockManager(){

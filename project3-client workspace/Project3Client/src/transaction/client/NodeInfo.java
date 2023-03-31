@@ -3,6 +3,7 @@ package transaction.client;
 
 import java.io.Serializable;
 
+//Done
 public class NodeInfo implements Serializable{
 	//init variables
 	int port;	

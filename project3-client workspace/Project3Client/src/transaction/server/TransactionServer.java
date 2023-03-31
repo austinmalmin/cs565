@@ -20,7 +20,7 @@ import utils.PropertyHandler;
 
 /*
  * Progress Note: 
- * 		Class is in working progress, there will be some errors at compile time.
+ * 		Completed
  */
 
 public class TransactionServer extends Thread{

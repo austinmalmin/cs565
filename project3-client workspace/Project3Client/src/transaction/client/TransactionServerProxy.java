@@ -12,18 +12,10 @@ import transaction.server.lock.TransactionAbortedException;
 
 /*
  * Progress Note: 
- * 		Class is in working progress, there will be some errors at compile time.
+ * 		Need to create random transactions.
  */
 public class TransactionServerProxy implements MessageTypes{
 	
-
-	/*
-	 * private static final int OPEN_TRANSACTION = null; private static final String
-	 * CLOSE_TRANSACTION = null; private static final String WRITE_REQUEST = null;
-	 * private static final String READ_REQUEST = null; private static final String
-	 * READ_REQUEST_RESPONSE = null; private static final String TRANSACTION_ABORTED
-	 * = null;
-	 */
 	String host = null;
 	int port;
 	
