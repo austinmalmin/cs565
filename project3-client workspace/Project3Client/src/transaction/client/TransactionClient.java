@@ -81,8 +81,6 @@ public class TransactionClient
 		
 	}
 		
-	
-
 	public static void main( String[] args)
 	{
 		String propertiesFile = null;

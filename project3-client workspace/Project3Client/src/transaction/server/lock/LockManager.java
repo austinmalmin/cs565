@@ -9,7 +9,7 @@ public class LockManager extends Thread{
 	public LockManager(){
 		//to do LM
 	}
-	public void setLock(Account account, Transaction transactionId, LockTypes lockType ) {
+	public void setLock(Transaction transactionId, LockTypes lockType ) {
 		/* Find the lock
 		 * acquire the lock of type lockType
 		 */

@@ -13,17 +13,17 @@ import transaction.comm.MessageTypes;
 import transaction.server.TransactionServer;
 import transaction.server.account.AccountManager;
 import transaction.server.lock.LockManager;
-
+import transaction.server.lock.LockTypes;
 //Add Colors once we format output
 
 //Progress Note: Need to add code for switch statements
 
-public class TransactionManager extends Thread implements MessageTypes
+public class TransactionManager extends Thread implements MessageTypes, LockTypes
 {	
 	
 	private static int transactionIdCounter = 0;
-	private static final ArrayList<AccountManager> runningTransactions = new ArrayList<> ();
-	private static final ArrayList<AccountManager> abortedTransactions = new ArrayList<>();
+	private static final ArrayList<Transaction> runningTransactions = new ArrayList<> ();
+	private static final ArrayList<Transaction> abortedTransactions = new ArrayList<>();
 	private static final String OPEN_COLOR = null;
 	private static final String RESET_COLOR = null;
 	private static int transactionNumberCounter = 0;
@@ -31,15 +31,13 @@ public class TransactionManager extends Thread implements MessageTypes
 	static AccountManager accountManager = null;
 	static LockManager lockManager = null;
 	
-	private static final ArrayList<AccountManager> committedTransactions = new ArrayList<> ();
+	private static final ArrayList<Transaction> committedTransactions = new ArrayList<> ();
 	
-	 public TransactionManager(AccountManager accountManager, LockManager lockManager) {
-	  
-		 this.accountManager = accountManager;
-		 this.lockManager = lockManager;
+	 public TransactionManager() {
+		 //
 	 }
 	
-	public ArrayList<AccountManager> getAbortedTransaction()
+	public ArrayList<Transaction> getAbortedTransaction()
 	{
 		return abortedTransactions;
 	}
@@ -53,6 +51,9 @@ public class TransactionManager extends Thread implements MessageTypes
 	public class TransactionManagerWorker extends Thread
 	{
 		
+		private static final String COMMIT_COLOR = null;
+		private static final String READ_COLOR = null;
+		private static final String WRITE_COLOR = null;
 		Socket client = null;
 		ObjectInputStream readFromNet = null;
 		ObjectOutputStream writeToNet = null;
@@ -100,10 +101,11 @@ public class TransactionManager extends Thread implements MessageTypes
 			catch(IOException | ClassNotFoundException e) 
 			{
 				System.out.println(" [TransactionManagerWorker. run] Message could not be read from object stream.");
-				System.exit (1);
+				TransactionServer.shutDown();
+				return;
 			}
 			
-			AccountManager transaction = null;
+			Transaction transaction = null;
 			switch (message.getType())
 			{
 
@@ -113,49 +115,78 @@ public class TransactionManager extends Thread implements MessageTypes
 					{
 						// assign a new transaction ID, also pass in the last assigned transaction number
 						// as to the latter, that number may refer to a (prior, non-overlapping) transaction that needed to be aborted
-						//transaction = new AccountManager(++transactionIdCounter, transactionNumberCounter);
+						transaction = new Transaction(++transactionIdCounter);
+						
 						runningTransactions.add(transaction);
 					}
 					try
 					{
-						writeToNet.writeObject(transaction.getTransactionID());
+						writeToNet.writeObject((Integer)transaction.getTransactionId());
 					}
 					catch(IOException e)
 					{
-						System.err.println("[TransactionManagerWorker.run] OPEN_TRANSACTION #" + transaction.getTransactionID() + " - Error writing transactionID");
+						System.err.println("[TransactionManagerWorker.run] OPEN_TRANSACTION #" + transaction.getTransactionId() + " - Error writing transactionID");
 					}
 					
 					transaction.log("[TransactionManagerWorker.run] " + OPEN_COLOR + "OPEN_TRANSACTION" + RESET_COLOR + " #" +
-							transaction.getTransactionID());
+							transaction.getTransactionId());
 					break;
 					
 					
 				case CLOSE_TRANSACTION:
 					
-					synchronized(runningTransactions)
-					{
-						runningTransactions.remove(transaction);
-						// code it here
+					TransactionServer.lockManager.unlock(transaction);
+					runningTransactions.remove(transaction);
+					committedTransactions.add(transaction);
+					
+					try {
+						
+						writeToNet.writeObject((Integer) TRANSACTION_COMMITTED);
+						
+						readFromNet.close();
+						writeToNet.close();
+						client.close();
+						
+						Keepgoing = false;
+					}
+					catch(IOException e) {
+						System.out.println("[TransactionManagerWorker.run] CLOSE_TRANSACTION - Error when closing the connection to client");
 					}
 					
+					transaction.log("[TransactionManagerWorker.run] " + COMMIT_COLOR + "CLOSE_TRANSACTION" + RESET_COLOR + " #" +
+							transaction.getTransactionId());
+					
+					if(TransactionServer.transactionView) {
+						System.out.println(transaction.getLog());
+					}
+					break;
 					
 				case WRITE_REQUEST:
 				
 					 //call AccountManager to acquire a WRITE Lock.
-				
+					accountNumber = (Integer) message.getContent();
+					transaction.log("[TransactionManagerWorker.run] " + WRITE_COLOR + "WRITE_REQUEST" + RESET_COLOR + ">>>>>>>>> accountNumber being wrote from" + accountNumber );
+					TransactionServer.lockManager.setLock(transaction, WRITE);
+					
+					try {
+						writeToNet.writeObject(new Message(WRITE_REQUEST_RESPONSE, accountNumber));
+					}
+					catch(Exception e) {
+						System.out.println("[TransactionManagerWorker.run] CLOSE_TRANSACTION - Error when writing the response to client");
+					}
+					
 				case READ_REQUEST:
 					
 					// call AccountManager to acquire a READ Lock.
-					
-				case READ_REQUEST_RESPONSE:
-					
-					//if Lock Acquired
-					 	
-						// READ Account Balance
-					
-					//else
-					
-					  	//Abort The Transaction
+					accountNumber = (Integer) message.getContent();
+					transaction.log("[TransactionManagerWorker.run] " + READ_COLOR + "READ_REQUEST" + RESET_COLOR + ">>>>>>>>> accountNumber being read from" + accountNumber );
+					TransactionServer.lockManager.setLock(transaction, READ);
+					try {
+						writeToNet.writeObject(new Message(READ_REQUEST_RESPONSE, accountNumber));
+					}
+					catch(Exception e) {
+						System.out.println("[TransactionManagerWorker.run] CLOSE_TRANSACTION - Error when sending the response to client");
+					}
 					 
 				case TRANSACTION_ABORTED:
 					

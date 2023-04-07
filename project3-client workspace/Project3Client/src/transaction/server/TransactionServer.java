@@ -30,7 +30,7 @@ public class TransactionServer extends Thread{
 	ServerSocket recieverSocket = null;
 	
 	static AccountManager accountManager = null;
-	static LockManager lockManager = null;
+	public static LockManager lockManager = null;
 	
 	static TransactionManager transactionManager = null;
 	static int messageCount = 0;
@@ -102,7 +102,7 @@ public class TransactionServer extends Thread{
 		
 		accountManager = new AccountManager(numAccounts, startingBal);
 		lockManager = new LockManager();
-		transactionManager = new TransactionManager(accountManager, lockManager);
+		transactionManager = new TransactionManager();
 	}
 	public void run()
 	{
@@ -132,5 +132,9 @@ public class TransactionServer extends Thread{
 	public static int getMessageCount() {
 		// TODO Auto-generated method stub
 		return messageCount;
+	}
+	public static void shutDown() {
+		// TODO Auto-generated method stub
+		
 	}
 }

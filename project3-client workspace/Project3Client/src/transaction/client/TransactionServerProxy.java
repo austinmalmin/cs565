@@ -58,8 +58,21 @@ public class TransactionServerProxy implements MessageTypes{
 	//implement this method with locking
 	public int closeTransaction() {
 		
+		int  returnStatus = TRANSACTION_COMMITTED;
+		
+		try {
 
-		return -1;
+			writeToNet.writeObject(new Message(CLOSE_TRANSACTION, null));
+			returnStatus = (Integer) readFromNet.readObject();
+			
+			readFromNet.close();
+			writeToNet.close();
+		}
+		catch(Exception ex) {
+			System.err.print("Error in closing Transaction");
+			ex.printStackTrace();
+		}
+		return returnStatus;
 	}
 	
 	public int read(int accountNumber) throws TransactionAbortedException
@@ -94,7 +107,7 @@ public class TransactionServerProxy implements MessageTypes{
 			
 		}
 		catch(IOException | ClassNotFoundException ex) {
-			System.out.println("[TransactionServerProxy.write] Error occurred: I0Exception | ClassNotFoundException");
+			System.out.println("[TransactionServerProxy.write] Error occurred: IOException | ClassNotFoundException");
 			ex.printStackTrace();
 			System.err.print("\n\n");
 		}
