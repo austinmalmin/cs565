@@ -1,6 +1,8 @@
 package transaction.server.lock;
 
-//Done
+/*
+ * Completed
+ */
 public class TransactionAbortedException extends Exception{
 
 	public void TransactionAbortedException() throws TransactionAbortedException {

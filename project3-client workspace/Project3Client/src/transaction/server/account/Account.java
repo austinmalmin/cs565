@@ -1,6 +1,8 @@
 package transaction.server.account;
 
-//Done
+/*
+ * Completed
+ */
 public class Account {
 
 	 int id;

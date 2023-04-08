@@ -5,12 +5,14 @@ import transaction.server.TransactionServer;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-//Need to implement Read and Write
+/*
+ * Completed
+ */
 public class AccountManager extends Thread
 {
 
 	
-	ArrayList<Account> accountList = new ArrayList<>();
+	public ArrayList<Account> accountList = new ArrayList<>();
 	
 	StringBuffer log = new StringBuffer("");
 	
@@ -48,23 +50,8 @@ public class AccountManager extends Thread
 	 */
 	public int read (int accountNumber)
 	{
+		return accountList.get(accountNumber).getBalance();
 		
-
-		// check if value to be read was written by this transaction
-		/*checks if locking is active
-		 * 
-		 * //attempts to get read lock via lockManager
-		 * 
-		 * //success: read account values
-		 * 
-		 * //otherwise deadLock detected, abort transaction
-		 * 
-		 * //log action
-		 * 
-		 * //read account value
-		 * 
-		 * //return data*/
-		return -1;
 	}
 	
 	/*
@@ -85,30 +72,8 @@ public class AccountManager extends Thread
 
 
 	*/
-	public int write(int accountNumber, int newBalance) {
-		//check if locking is active
-		/* 
-		 * //attempt to acquire a write lock on the account
-		 * 
-		 * //success-> update account value to value
-		 * 
-		 * //set return flag to success
-		 * 
-		 * //otherwise deadlock detected and thread aborted
-		 * 
-		 * //set return flag to aborted
-		 * 
-		 * //log action
-		 * 
-		 * 
-		 * //otherwise locking is inactive
-		 * 
-		 * //update account value to value
-		 * 
-		 * //set return flag to success
-		 * 
-		 * //return flag return successFlag;*/
-		return -1;
+	public void write(int accountNumber, int newBalance) {
+		accountList.get(accountNumber).setBalance(newBalance);
 	}
 	
 

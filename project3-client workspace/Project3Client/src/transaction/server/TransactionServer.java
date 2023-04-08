@@ -102,7 +102,7 @@ public class TransactionServer extends Thread{
 		
 		accountManager = new AccountManager(numAccounts, startingBal);
 		lockManager = new LockManager();
-		transactionManager = new TransactionManager();
+		transactionManager = new TransactionManager(accountManager, lockManager);
 	}
 	public void run()
 	{

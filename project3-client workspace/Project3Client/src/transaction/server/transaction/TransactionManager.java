@@ -16,7 +16,9 @@ import transaction.server.lock.LockManager;
 import transaction.server.lock.LockTypes;
 //Add Colors once we format output
 
-//Progress Note: Need to add code for switch statements
+/*
+ * Completed
+ */
 
 public class TransactionManager extends Thread implements MessageTypes, LockTypes
 {	
@@ -28,13 +30,22 @@ public class TransactionManager extends Thread implements MessageTypes, LockType
 	private static final String RESET_COLOR = null;
 	private static int transactionNumberCounter = 0;
 	
+	Object[] content; 
+	int accountNumber;
+	int balance;
+	int transactionId;
+	boolean success = false;
+	int  numCommitted = 0;
+	
 	static AccountManager accountManager = null;
-	static LockManager lockManager = null;
+	public static LockManager lockManager = null;
+	
 	
 	private static final ArrayList<Transaction> committedTransactions = new ArrayList<> ();
 	
-	 public TransactionManager() {
-		 //
+	 public TransactionManager(AccountManager accountManager, LockManager lockManager) {
+		 this.accountManager = accountManager;
+		 this.lockManager = lockManager;
 	 }
 	
 	public ArrayList<Transaction> getAbortedTransaction()
@@ -48,6 +59,21 @@ public class TransactionManager extends Thread implements MessageTypes, LockType
 		
 	}
 	
+	public ArrayList<Transaction> getRunningTransactions(){
+		return runningTransactions;
+	}
+	
+	public ArrayList<Transaction> getCommittedTransactions(){
+		return committedTransactions;
+	}
+	
+	public int getSum() {
+		int sum=0;
+		for(int i =0; i<accountManager.accountList.size(); i++) {
+			sum += accountManager.accountList.get(i).getBalance();
+		}
+		return sum;
+	}
 	public class TransactionManagerWorker extends Thread
 	{
 		
@@ -115,13 +141,16 @@ public class TransactionManager extends Thread implements MessageTypes, LockType
 					{
 						// assign a new transaction ID, also pass in the last assigned transaction number
 						// as to the latter, that number may refer to a (prior, non-overlapping) transaction that needed to be aborted
+						
+						System.out.println("Creating Transaction");
+						
 						transaction = new Transaction(++transactionIdCounter);
 						
 						runningTransactions.add(transaction);
 					}
 					try
 					{
-						writeToNet.writeObject((Integer)transaction.getTransactionId());
+						writeToNet.writeObject(new Message(OPEN_TRANSACTION, transaction.getTransactionId()));
 					}
 					catch(IOException e)
 					{
@@ -136,12 +165,13 @@ public class TransactionManager extends Thread implements MessageTypes, LockType
 				case CLOSE_TRANSACTION:
 					
 					TransactionServer.lockManager.unlock(transaction);
+					
 					runningTransactions.remove(transaction);
 					committedTransactions.add(transaction);
 					
 					try {
 						
-						writeToNet.writeObject((Integer) TRANSACTION_COMMITTED);
+						writeToNet.writeObject(new Message(TRANSACTION_COMMITTED, TRANSACTION_COMMITTED));
 						
 						readFromNet.close();
 						writeToNet.close();
@@ -164,36 +194,90 @@ public class TransactionManager extends Thread implements MessageTypes, LockType
 				case WRITE_REQUEST:
 				
 					 //call AccountManager to acquire a WRITE Lock.
-					accountNumber = (Integer) message.getContent();
+					content =  (Object[]) message.getContent();
+					accountNumber = (Integer) content[0];
+					balance = (Integer) content[1];
+					transactionId = (int) content[2];
+					
+					for(int i=0; i<runningTransactions.size(); i++) {
+						if(runningTransactions.get(i).getTransactionId() == transactionId) {
+							transaction = runningTransactions.get(i);
+							break;
+						}
+					}
+	
 					transaction.log("[TransactionManagerWorker.run] " + WRITE_COLOR + "WRITE_REQUEST" + RESET_COLOR + ">>>>>>>>> accountNumber being wrote from" + accountNumber );
-					TransactionServer.lockManager.setLock(transaction, WRITE);
 					
-					try {
-						writeToNet.writeObject(new Message(WRITE_REQUEST_RESPONSE, accountNumber));
-					}
-					catch(Exception e) {
-						System.out.println("[TransactionManagerWorker.run] CLOSE_TRANSACTION - Error when writing the response to client");
-					}
+					success = TransactionServer.lockManager.setLock(transaction, WRITE);
 					
+					if(success) {
+						accountManager.write(accountNumber, balance);
+					
+						try {
+							writeToNet.writeObject(new Message(WRITE_REQUEST_RESPONSE, accountNumber));
+						}
+						catch(Exception e) {
+							System.out.println("[TransactionManagerWorker.run] WRITE_REQUEST_RESPONSE - Error when writing the response to client");
+						}
+					}
+					else
+					{
+						try {
+							writeToNet.writeObject(new Message(TRANSACTION_ABORTED, accountNumber));
+						}
+						catch(Exception e) {
+							System.out.println("[TransactionManagerWorker.run] TRANSACTION_ABORTED - Error when writing the response to client");
+						}
+					}
 				case READ_REQUEST:
 					
 					// call AccountManager to acquire a READ Lock.
-					accountNumber = (Integer) message.getContent();
+					content = (Object[]) message.getContent();
+					accountNumber = (int) content[0];
+					transactionId = (int) content[1];
+					
+					for(int i=0; i<runningTransactions.size(); i++) {
+						if(runningTransactions.get(i).getTransactionId() == transactionId) {
+							transaction = runningTransactions.get(i);
+							break;
+						}
+					}
+					
 					transaction.log("[TransactionManagerWorker.run] " + READ_COLOR + "READ_REQUEST" + RESET_COLOR + ">>>>>>>>> accountNumber being read from" + accountNumber );
-					TransactionServer.lockManager.setLock(transaction, READ);
+					
+					success = TransactionServer.lockManager.setLock(transaction, WRITE);
+					
+					if(success) {
+						
+						balance = accountManager.read(accountNumber);
+					
+						try {
+							writeToNet.writeObject(new Message(READ_REQUEST_RESPONSE, balance));
+						}
+						catch(Exception e) {
+							System.out.println("[TransactionManagerWorker.run] READ_REQUEST_RESPONSE - Error when writing the response to client");
+						}
+					}
+					else
+					{
+						try {
+							writeToNet.writeObject(new Message(TRANSACTION_ABORTED, balance));
+						}
+						catch(Exception e) {
+							System.out.println("[TransactionManagerWorker.run] TRANSACTION_ABORTED - Error when writing the response to client");
+						}
+					}
+					
+				case GET_SUM:
+					
+					int sum = getSum();
+					
 					try {
-						writeToNet.writeObject(new Message(READ_REQUEST_RESPONSE, accountNumber));
+						writeToNet.writeObject(new Message(GET_SUM, sum));
 					}
 					catch(Exception e) {
-						System.out.println("[TransactionManagerWorker.run] CLOSE_TRANSACTION - Error when sending the response to client");
+						System.out.println("[TransactionManagerWorker.run] GET_SUM - Error when writing the response to client");
 					}
-					 
-				case TRANSACTION_ABORTED:
-					
-					//Release all locks according to the transaction.
-					
-					//add the transaction to the list of aborted transactions
-		
 			}
 		}		
 	  }

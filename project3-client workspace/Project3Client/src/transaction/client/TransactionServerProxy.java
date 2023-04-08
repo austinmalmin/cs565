@@ -12,7 +12,7 @@ import transaction.server.lock.TransactionAbortedException;
 
 /*
  * Progress Note: 
- * 		Need to create random transactions.
+ * 		completed
  */
 public class TransactionServerProxy implements MessageTypes{
 	
@@ -23,6 +23,7 @@ public class TransactionServerProxy implements MessageTypes{
 	private ObjectOutputStream writeToNet = null;
 	private ObjectInputStream readFromNet = null;
 	private Integer transactionID = 0;
+	Object[] content;
 	/**
 	* Constructor
 	* @param host IP address of the transaction server
@@ -34,6 +35,10 @@ public class TransactionServerProxy implements MessageTypes{
 		this.port = port;
 	}
 	
+	/*
+	 * opens the transaction 
+	 * returns transactionId
+	 */
 	public int openTransaction() {
 		
 		try {
@@ -46,7 +51,8 @@ public class TransactionServerProxy implements MessageTypes{
 		}
 		try {
 			writeToNet.writeObject(new Message(OPEN_TRANSACTION, null));
-			transactionID = (Integer) readFromNet.readObject();
+			Message message = (Message) readFromNet.readObject();
+			transactionID = (Integer) message.getContent();
 		} 
 		catch (IOException | ClassNotFoundException | NullPointerException ex) {
 			System.out.println(" [TransactionServerProxy.openTransaction] Error when writing/reading messages");
@@ -55,7 +61,9 @@ public class TransactionServerProxy implements MessageTypes{
 		return transactionID;
 	}
 	
-	//implement this method with locking
+	/*
+	 * closes transacttion from server
+	 */
 	public int closeTransaction() {
 		
 		int  returnStatus = TRANSACTION_COMMITTED;
@@ -63,7 +71,7 @@ public class TransactionServerProxy implements MessageTypes{
 		try {
 
 			writeToNet.writeObject(new Message(CLOSE_TRANSACTION, null));
-			returnStatus = (Integer) readFromNet.readObject();
+			//returnStatus = (Integer) readFromNet.readObject();
 			
 			readFromNet.close();
 			writeToNet.close();
@@ -75,9 +83,14 @@ public class TransactionServerProxy implements MessageTypes{
 		return returnStatus;
 	}
 	
-	public int read(int accountNumber) throws TransactionAbortedException
+	/*
+	 * gets account balance from server
+	 */
+	public int read(int accountNumber, int transactionId) throws TransactionAbortedException
 	{
-		Message message = new Message(READ_REQUEST, accountNumber);
+		content = new Object[] {accountNumber, transactionId};
+		
+		Message message = new Message(READ_REQUEST, content);
 		try
 		{
 			writeToNet.writeObject (message);
@@ -96,9 +109,12 @@ public class TransactionServerProxy implements MessageTypes{
 		}
 	}
 	
-	public void write(int accountNumber, int amount) throws TransactionAbortedException
+	/*
+	 * write amount to account number on server
+	 */
+	public void write(int accountNumber, int amount, int transactionId) throws TransactionAbortedException
 	{
-		Object[] content = new Object[] {accountNumber, amount};
+		Object[] content = new Object[] {accountNumber, amount, transactionId};
 		Message message = new Message(WRITE_REQUEST, content);
 		
 		try {
@@ -113,8 +129,32 @@ public class TransactionServerProxy implements MessageTypes{
 		}
 		if (message.getType() == TRANSACTION_ABORTED)
 		{
-		// here we have an ABORT TRANSACTION
+			// here we have an ABORT TRANSACTION
 			throw new TransactionAbortedException();
 		}
+	}
+	
+	public int getSum() 
+	{
+		try {
+			dbConnection = new Socket(host, port);
+			writeToNet = new ObjectOutputStream(dbConnection.getOutputStream()) ;
+			readFromNet = new ObjectInputStream(dbConnection. getInputStream()) ;
+		} catch (IOException ex) {
+			System.out.println(" [TransactionServerProxy.openTransaction] Error occurred when opening object streams"); 
+			ex.printStackTrace();
+		}
+		
+		try {
+			writeToNet.writeObject(new Message(GET_SUM, null));
+			Message message = (Message) readFromNet.readObject();
+			return (int) message.getContent();
+		}
+		catch(IOException | ClassNotFoundException ex) {
+			System.out.println("[TransactionServerProxy.write] Error occurred: IOException | ClassNotFoundException");
+			ex.printStackTrace();
+			System.err.print("\n\n");
+		}
+		return 0;
 	}
 }

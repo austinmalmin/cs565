@@ -4,16 +4,20 @@ package transaction.server.lock;
 import java.util.ArrayList;
 import java.util. HashMap;
 import java.util. Iterator;
+import java.util.List;
+
 import transaction.server.transaction.Transaction;
 import transaction.server.account.Account;
 
-//Largely done - fix the error in the hashmap!
+/*
+ * completed
+ */
 public class Lock implements LockTypes
 {
-	private int currentLockType;
-	private final Account account;
-	private final ArrayList<Transaction> lockHolders;
-	private final HashMap<Transaction, Object[]> lockRequestors;
+	public int currentLockType;
+	public final Account account;
+	public final ArrayList<Transaction> lockHolders;
+	public final HashMap<Transaction, Integer[]> lockRequestors;
 
 	private static String preFixLogString = "[Lock.acquire]   |";
 	/**
@@ -23,8 +27,8 @@ public class Lock implements LockTypes
 	public Lock(Account account)
 	{
 		this.account = account;
-		this.lockHolders = new ArrayList();
-		this.lockRequestors = new HashMap();
+		this.lockHolders = new ArrayList<Transaction>();
+		this.lockRequestors = new HashMap<Transaction, Integer[]>();
 		this.currentLockType = EMPTY_LOCK;
 
 	}
@@ -55,7 +59,7 @@ public class Lock implements LockTypes
 		transaction.log(preFixLogString + " trying to set " + getLockTypeString(lockType)  + " on account #" + account.getId());
 		
 		//starting the conflict loop
-		while(isConflict(transaction, lockType)) {
+		while(!isConflict(transaction, lockType)) {
 			
 			
 			ArrayList<Lock> locks = transaction.getLocks();
@@ -101,15 +105,39 @@ public class Lock implements LockTypes
 	public void addLockRequestor(Transaction transaction, int lockType) {
 		// TODO Auto-generated method stub
 		//Not correct - fix it 
-		Object[] lockarrayObj = new Object[lockType];
+		Integer[] lockarrayObj =  {lockType, transaction.getTransactionId()};
 		lockRequestors.put(transaction, lockarrayObj);
+		
+		
 	}
 
 
 
 	private boolean isConflict(Transaction transaction, int lockType) {
 		// TODO Auto-generated method stub
-		return false;
+		ArrayList<Lock> tLocks = transaction.getLocks();
+		
+		if(tLocks.isEmpty()) {
+			return false;
+		}
+		else {
+			Iterator<Lock> lockIterator = tLocks.iterator();
+			
+			while(lockIterator.hasNext()) {
+				
+				Lock currentLock = (Lock) lockIterator.next();
+				Integer[] requestorList = currentLock.lockRequestors.get(transaction);
+				
+				for(int i=0; i<requestorList.length; i++) {
+					
+					if(requestorList[i] == lockType) {
+						return true;
+					}	
+				}	
+			}
+			return false;
+		}
+			
 	}
 
 

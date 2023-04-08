@@ -1,6 +1,8 @@
 package transaction.server.lock;
 
-//Done
+/*
+ * Completed
+ */
 public interface LockTypes {
 	
 	public static final int EMPTY_LOCK = 0;

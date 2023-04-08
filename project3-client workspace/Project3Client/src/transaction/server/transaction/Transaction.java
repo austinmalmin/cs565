@@ -2,11 +2,13 @@ package transaction.server.transaction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.locks.Lock;
+import transaction.server.lock.Lock;
 
 import transaction.server.TransactionServer;
 
-//Complete - bug on getLocks()
+/*
+ * Completed
+ */
 public class Transaction {
 
 	int transactionId;
