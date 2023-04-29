@@ -75,8 +75,8 @@ public class Satellite extends Thread {
 		}
     	
     	try {
-			satelliteInfo.setPort(Integer.parseInt(serverProperties.getProperty("PORT")));
-			satelliteInfo.setName(serverProperties.getProperty("NAME"));
+			satelliteInfo.setPort(Integer.parseInt(satelliteProperties.getProperty("PORT")));
+			satelliteInfo.setName(satelliteProperties.getProperty("NAME"));
 		}
 		catch (NumberFormatException ex) {
 			Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, 
@@ -92,8 +92,8 @@ public class Satellite extends Thread {
         // ...
 
     	try {
-    		classLoader.port = (Integer.parseInt(serverProperties.getProperty("PORT")));
-    		classLoader.host = (serverProperties.getProperty("HOST"));
+    		classLoader.port = (Integer.parseInt(classLoaderProperties.getProperty("PORT")));
+    		classLoader.host = (classLoaderProperties.getProperty("HOST"));
 		}
 		catch (NumberFormatException ex) {
 			Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, 
@@ -105,6 +105,8 @@ public class Satellite extends Thread {
         // -------------------
         // ...
         
+    	//printing satellite
+    	System.out.println(satelliteInfo.getName() + satelliteInfo.getPort());
     }
 
     @Override
@@ -113,27 +115,50 @@ public class Satellite extends Thread {
         // register this satellite with the SatelliteManager on the server
         // ---------------------------------------------------------------
         // ...
-        
-        
-        // create server socket
-        // ---------------------------------------------------------------
-        // ...
-    	try {
-			serverSocket = new ServerSocket(serverInfo.getPort());
-		} catch (IOException e) {
-			Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, 
-					"error creating server socket ", e);
-			System.exit(1);
-		}
     	
+        try {
+        	// create server socket
+            // ---------------------------------------------------------------
+            // ...
+        	
+			Socket server = new Socket(serverInfo.getHost(), serverInfo.getPort());
+			
+			System.out.println("setting up reader & writer");
+			
+			
+			
+			ObjectOutputStream serverWriteToNet = new ObjectOutputStream(server.getOutputStream());
+			ObjectInputStream serverReadFromNet = new ObjectInputStream(server.getInputStream());
+			
+			System.out.println("reader and writer created!");
+
+			
+			serverWriteToNet.writeObject(new Message(REGISTER_SATELLITE, this.satelliteInfo));
+			
+			System.out.println("satellite registered!");
+
+			serverSocket = new ServerSocket(satelliteInfo.getPort());
+			
+			
+			
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         
+  
         // start taking job requests in a server loop
         // ---------------------------------------------------------------
         // ...
     	while(true) {
     		try {
+    			
 				Socket clientConn = (serverSocket.accept());
 				(new SatelliteThread(clientConn, this)).run();
+				
 			} catch (IOException e) {
 				Logger.getLogger(Satellite.class.getName()).log(Level.SEVERE, 
 						"error receiving client connection ", e);
@@ -185,6 +210,8 @@ public class Satellite extends Thread {
                     Job job = (Job) message.getContent();
 				try {
 					Tool tool =  getToolObject(job.getToolName(), satellite);
+					writeToNet.writeObject(tool.go(job.getParameters()));
+					
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -206,12 +233,16 @@ public class Satellite extends Thread {
 				} catch (SecurityException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
                     break;
 
                 default:
                     System.err.println("[SatelliteThread.run] Warning: Message type not implemented");
             }
+            
         }
     }
 
@@ -230,7 +261,7 @@ public class Satellite extends Thread {
         // ...check if in cache
         if((toolObject  = satellite.cache.get(toolClassString)) == null) {
         	
-        	System.out.println("tool class string " + toolClassString);
+        	System.out.println("tool class string " + toolClassString + " loading class ");
         	Class<?> toolObjectClass = satellite.classLoader.loadClass(toolClassString);
         	
         	try {
@@ -244,6 +275,7 @@ public class Satellite extends Thread {
         	}
         	
         	satellite.cache.put(toolClassString, toolObject);
+        	System.out.println(toolClassString + " Added to cache ");
         }
         else {
         	System.out.println("Tool: " + toolClassString + " already in cache ");
@@ -259,6 +291,7 @@ public class Satellite extends Thread {
     		 satellite = new Satellite("config/Satellite.Earth.properties", "config/WebServer.properties", "config/Server.properties");
     	}
     	else {
+    		System.out.println("entered else");
     		 satellite = new Satellite(args[0], args[1], args[2]);
     	}
     	satellite.run();

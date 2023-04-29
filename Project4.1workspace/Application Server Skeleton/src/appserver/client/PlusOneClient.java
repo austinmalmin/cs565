@@ -35,32 +35,34 @@ public class PlusOneClient implements MessageTypes{
     }
     
     public void run() {
-        try { 
-            // connect to application server
-            Socket server = new Socket(host, port);
-            
-            // hard-coded string of class, aka tool name ... plus one argument
-            String classString = "appserver.job.impl.PlusOne";
-            Integer number = new Integer(42);
-            
-            // create job and job request message
-            Job job = new Job(classString, number);
-            Message message = new Message(JOB_REQUEST, job);
-            
-            // sending job out to the application server in a message
-            ObjectOutputStream writeToNet = new ObjectOutputStream(server.getOutputStream());
-            writeToNet.writeObject(message);
-            System.out.println("job was sent");
-            // reading result back in from application server
-            // for simplicity, the result is not encapsulated in a message
-            ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
-            System.out.println("result was received");
-            Integer result = (Integer) readFromNet.readObject();
-            System.out.println("RESULT: " + result);
-        } catch (Exception ex) {
-            System.err.println("[PlusOneClient.run] Error occurred");
-            ex.printStackTrace();
-        }
+    	for(int i=0; i<5; i++) {
+	        try { 
+	            // connect to application server
+	            Socket server = new Socket(host, port);
+	            
+	            // hard-coded string of class, aka tool name ... plus one argument
+	            String classString = "appserver.job.impl.PlusOne";
+	            Integer number = new Integer(42);
+	            
+	            // create job and job request message
+	            Job job = new Job(classString, number);
+	            Message message = new Message(JOB_REQUEST, job);
+	            
+	            // sending job out to the application server in a message
+	            ObjectOutputStream writeToNet = new ObjectOutputStream(server.getOutputStream());
+	            writeToNet.writeObject(message);
+	            //System.out.println("job was sent");
+	            // reading result back in from application server
+	            // for simplicity, the result is not encapsulated in a message
+	            ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
+	            //System.out.println("result was received");
+	            Integer result = (Integer) readFromNet.readObject();
+	            System.out.println( i + "RESULT: " + result);
+	        } catch (Exception ex) {
+	            System.err.println("[PlusOneClient.run] Error occurred");
+	            ex.printStackTrace();
+	        }
+    	}
     }
 
     public static void main(String[] args) {
