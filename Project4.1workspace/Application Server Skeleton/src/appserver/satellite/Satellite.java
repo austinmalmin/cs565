@@ -106,7 +106,7 @@ public class Satellite extends Thread {
         // ...
         
     	//printing satellite
-    	System.out.println(satelliteInfo.getName() + satelliteInfo.getPort());
+    	System.out.println(satelliteInfo.getName() + " " +  satelliteInfo.getPort());
     }
 
     @Override
@@ -123,19 +123,19 @@ public class Satellite extends Thread {
         	
 			Socket server = new Socket(serverInfo.getHost(), serverInfo.getPort());
 			
-			System.out.println("setting up reader & writer");
+			System.out.println("setting up reader & writer ");
 			
 			
 			
 			ObjectOutputStream serverWriteToNet = new ObjectOutputStream(server.getOutputStream());
 			ObjectInputStream serverReadFromNet = new ObjectInputStream(server.getInputStream());
 			
-			System.out.println("reader and writer created!");
+			System.out.println("reader and writer created! ");
 
 			
 			serverWriteToNet.writeObject(new Message(REGISTER_SATELLITE, this.satelliteInfo));
 			
-			System.out.println("satellite registered!");
+			System.out.println("satellite registered! ");
 
 			serverSocket = new ServerSocket(satelliteInfo.getPort());
 			
@@ -261,7 +261,7 @@ public class Satellite extends Thread {
         // ...check if in cache
         if((toolObject  = satellite.cache.get(toolClassString)) == null) {
         	
-        	System.out.println("tool class string " + toolClassString + " loading class ");
+        	System.out.println("Tool class string " + toolClassString + " loading class ");
         	Class<?> toolObjectClass = satellite.classLoader.loadClass(toolClassString);
         	
         	try {
@@ -291,7 +291,7 @@ public class Satellite extends Thread {
     		 satellite = new Satellite("config/Satellite.Earth.properties", "config/WebServer.properties", "config/Server.properties");
     	}
     	else {
-    		System.out.println("entered else");
+    		System.out.println("entered else ");
     		 satellite = new Satellite(args[0], args[1], args[2]);
     	}
     	satellite.run();

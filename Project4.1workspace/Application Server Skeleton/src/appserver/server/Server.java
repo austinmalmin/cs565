@@ -119,7 +119,7 @@ public class Server {
                         // ...
                     	satelliteManager.registerSatellite(conInfo);
                     }
-        			System.out.println("satellite registered!");
+        			System.out.println("satellite registered! ");
 
                     // add satellite to loadManager
                     synchronized (Server.loadManager) {
@@ -127,12 +127,12 @@ public class Server {
                     	loadManager.satelliteAdded(conInfo.getName());
                     }
                     
-        			System.out.println("satellite added to load manager");
+        			System.out.println(" satellite added to load manager ");
 
                     break;
 
                 case JOB_REQUEST:
-                    System.err.println("\n[ServerThread.run] Received job request");
+                    System.err.println("\n[ServerThread.run] Received job request ");
 
                     String satelliteName = null;
                     synchronized (Server.loadManager) {

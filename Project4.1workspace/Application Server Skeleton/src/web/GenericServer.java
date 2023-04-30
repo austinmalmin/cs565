@@ -48,9 +48,9 @@ public abstract class GenericServer implements Runnable {
             serverSocket = new ServerSocket(port);
 
             while (true) {
-                System.out.println("[GenericServer.run] Waiting for connections on Port #" + port);
+                System.out.println("[GenericServer.run] Waiting for connections on Port # " + port);
                 socket = serverSocket.accept();
-                System.out.println("[GenericServer.run] A connection to a client is established!");
+                System.out.println("[GenericServer.run] A connection to a client is established! ");
                 processConnection(socket);
             }
 

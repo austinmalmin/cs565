@@ -23,9 +23,9 @@ public class FibonacciClient extends Thread implements MessageTypes{
         try {
             properties = new PropertyHandler(serverPropertiesFile);
             host = properties.getProperty("HOST");
-            System.out.println("[FibonacciClient.FibonacciClient] Host: " + host);
+            System.out.println(" [FibonacciClient.FibonacciClient] Host: " + host);
             port = Integer.parseInt(properties.getProperty("PORT"));
-            System.out.println("[FibonacciClient.FibonacciClient] Port: " + port);
+            System.out.println(" [FibonacciClient.FibonacciClient] Port: " + port);
             this.num = num;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -55,7 +55,7 @@ public class FibonacciClient extends Thread implements MessageTypes{
 	        Integer result = (Integer) readFromNet.readObject();
 	        System.out.println(" Finonacci of " + this.num +": " + result);
 	    } catch (Exception ex) {
-	        System.err.println("[FibonacciClient.run] Error occurred");
+	        System.err.println(" [FibonacciClient.run] Error occurred ");
 	        ex.printStackTrace();
 	    }
 	}

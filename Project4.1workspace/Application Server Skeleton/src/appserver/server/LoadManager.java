@@ -22,7 +22,7 @@ public class LoadManager {
     	satellites.add(satelliteName);
     	 
     	for(String item : satellites) {
-    		System.out.print("item, " + item);
+    		System.out.print("item: " + item + ", ");
     	}
     	
     }

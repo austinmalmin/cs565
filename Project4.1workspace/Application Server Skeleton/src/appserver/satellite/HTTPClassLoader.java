@@ -38,7 +38,7 @@ public class HTTPClassLoader extends ClassLoader {
         byte[] classData = loadClassData(className);
 
         Class classObject = defineClass(className, classData, 0, classData.length);
-        System.out.println("Class object \"" + className + "\" created");
+        System.out.println(" Class object \"" + className + "\" created ");
         return classObject;
     }
 

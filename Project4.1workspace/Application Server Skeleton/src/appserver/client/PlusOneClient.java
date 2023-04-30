@@ -57,9 +57,9 @@ public class PlusOneClient implements MessageTypes{
 	            ObjectInputStream readFromNet = new ObjectInputStream(server.getInputStream());
 	            //System.out.println("result was received");
 	            Integer result = (Integer) readFromNet.readObject();
-	            System.out.println( i + "RESULT: " + result);
+	            System.out.println( i + " RESULT: " + result);
 	        } catch (Exception ex) {
-	            System.err.println("[PlusOneClient.run] Error occurred");
+	            System.err.println("[PlusOneClient.run] Error occurred ");
 	            ex.printStackTrace();
 	        }
     	}
